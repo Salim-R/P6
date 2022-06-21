@@ -8,7 +8,8 @@ const stuffCtrl = require('../controllers/sauce');
 router.get('/', auth, stuffCtrl.getAllThing);
 router.post('/', auth, multer, stuffCtrl.createThing);
 router.get('/:id', auth, stuffCtrl.getOneThing);
-router.put('/:id', auth, stuffCtrl.modifyThing);
+router.put('/:id', auth, multer, stuffCtrl.modifyThing);
 router.delete('/:id', auth, stuffCtrl.deleteThing);
+router.post("/:id/like", auth, stuffCtrl.likeFicheUser);
 
 module.exports = router;
