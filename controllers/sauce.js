@@ -87,73 +87,79 @@ exports.deleteThing = (req, res, next) => {
 
 exports.likeFicheUser = (req, res, next) => {
 
-  //like = 0 (like = 0 neutre)
   Sauce.findOne({ _id: req.params.id })
-    .then((things) => {
-      //si le userliked est false et si like ===1
+    .then((sauce) => {
+      //like =1 (like = +1)
 
-      switch (req.body.likes) {
+      //mise en place d'un switch case()
+      switch (req.body.like) {
+
         case 1:
+          //si le userliked est false et si like ===1
+          if (!sauce.usersLiked.includes(req.body.userId) && req.body.like === 1) {
 
-          if (!things.usersLiked.includes(req.body.userId && req.body.likes === 1)) {
-            Sauce.uptadeOne(
+            Sauce.updateOne(
               { _id: req.params.id },
               {
-                $inc: { likes: +1 },
                 $push: { usersLiked: req.body.userId },
+                $inc: { likes: +1 }
+
               }
             )
-              .then(() => res.status(201).json({ message: "stuffCtrl like +1" }))
-              .catch((error) => res.status(404).json({ error }));
+              .then(() => res.status(201).json({ message: "usersLiked like +1" }))
+              .catch((error) => res.status(400).json({ error }));
+
           }
-          // mise a jour objet BDD
           break;
 
         case -1:
-
-          if (!things.usersDisliked.includes(req.body.userId) && req.body.likes === -1) {
-            // like = -1 (dislike)
+          // like = -1 (dislike = +1)
+          if (!sauce.usersDisliked.includes(req.body.userId) && req.body.like === -1) {
             Sauce.updateOne(
               { _id: req.params.id },
               {
                 $inc: { dislikes: +1 },
-                $push: (usersDisliked / Request.BODY.userId)
+                $push: { usersDisliked: req.body.userId }
+
+
               }
             )
-              .then(() => {
-                res.status(201).json({ message: "likeFicheUser dislike +1" })
-              })
-              .catch(() => res.status(404).json({ error }));
+              .then(() => res.status(201).json({ message: "usersLiked like 0" }))
+              .catch((error) => res.status(400).json({ error }));
           }
-
-          //like = 1 (like +1)
-          //like = 0 (dislikes = 0)
-
           break;
 
         case 0:
-          //like = 0 aprs un -1 oe le met a 0 pas de vte on enleve le dislike
-          if (things.usersLiked.includes(req.body.userId)) {
+          //like = 0 (likes = 0 pas de vote)
+          if (sauce.usersLiked.includes(req.body.userId)) {
+
             Sauce.updateOne(
               { _id: req.params.id },
               {
-                $inc: { likes: -1 },
                 $pull: { usersLiked: req.body.userId },
+                $inc: { likes: -1 }
+
               }
             )
-              .then(() => res.status(201).json({ message: "likedFicheUser like 0" }))
-              .catch(() => res.status(404).json({ error }));
-          } if (things.usersDisliked.includes(req.body.userId) && req.body.likes === 0) {
+              .then(() => res.status(201).json({ message: "usersLiked like 0" }))
+              .catch((error) => res.status(400).json({ error }));
+
+          }
+
+
+          // like a 0 apres un like -1
+          if (sauce.usersDisliked.includes(req.body.userId)) {
             Sauce.updateOne(
               { _id: req.params.id },
               {
                 $inc: { dislikes: -1 },
-                $pull: { usersDisliked: req.body.userId },
+                $pull: { usersDisliked: req.body.userId }
               }
             )
-              .then(() => res.status(201).json({ message: "likedFicheUser like 0" }))
-              .catch(() => res.status(404).json({ error }));
+              .then(() => res.status(201).json({ message: "usersLiked like 0" }))
+              .catch((error) => res.status(400).json({ error }));
           }
-      }
+          break;
+      };
     })
 };
