@@ -5,6 +5,9 @@ const auth = require('../middleware/auth');
 
 const stuffCtrl = require('../controllers/sauce');
 
+
+// Les différentes routes avec les middlewares de gestion d'images et d'auth
+
 router.get('/', auth, stuffCtrl.getAllThing);
 router.post('/', auth, multer, stuffCtrl.createThing);
 router.get('/:id', auth, stuffCtrl.getOneThing);

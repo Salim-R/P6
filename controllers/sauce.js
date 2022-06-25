@@ -1,6 +1,7 @@
 const fs = require("fs");
 const Sauce = require('../models/Sauce');
 
+// création d'une sauce
 exports.createThing = (req, res, next) => {
 
   // lecture de l'objet sauce en requête
@@ -41,24 +42,26 @@ exports.createThing = (req, res, next) => {
       }`,
   });
 
-  // Sauvegarde de l'objet sauce en BDD
+  // Sauvegarde de l'objet sauce dans la BDD
 
   sauce.save()
     .then(() => res.status(201).json({ message: "Item saved !" }))
     .catch((error) => res.status(400).json({ error }));
 };
-
+// Affichage de toutes les sauces
 exports.getAllThing = (req, res, next) => {
   Sauce.find()
     .then(things => res.status(200).json(things))
     .catch(error => res.status(400).json({ error }));
 };
+// Affichage d'une seul sauce
 exports.getOneThing = (req, res, next) => {
   Sauce.findOne({ _id: req.params.id })
     .then(sauce => res.status(200).json(sauce))
     .catch(error => res.status(404).json({ error }));
 };
 
+// Modification d'une sauce
 exports.modifyThing = (req, res, next) => {
   const thingObject = req.file ?
     {
@@ -69,10 +72,11 @@ exports.modifyThing = (req, res, next) => {
     .then(() => res.status(200).json({ message: 'Objet modifié !' }))
     .catch(error => res.status(400).json({ error }));
 };
-
+// Suppression d'une sauce
 exports.deleteThing = (req, res, next) => {
   Sauce.findOne({ _id: req.params.id })
     .then(sauce => {
+      // Suppression de l'image dans le système de fichiers et de son lien en bdd
       const filename = sauce.imageUrl.split('/images/')[1];
       fs.unlink(`images/${filename}`, () => {
         Sauce.deleteOne({ _id: req.params.id })
@@ -84,7 +88,7 @@ exports.deleteThing = (req, res, next) => {
 };
 
 
-
+// Gestion like / Dislike
 exports.likeFicheUser = (req, res, next) => {
 
   Sauce.findOne({ _id: req.params.id })

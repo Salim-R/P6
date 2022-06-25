@@ -6,13 +6,23 @@ const helmet = require('helmet');
 const sauceRoutes = require('./routes/sauce');
 const userRoutes = require('./routes/user');
 
-mongoose.connect('mongodb+srv://Salim:limsalimsa84@cluster0.pbtvn.mongodb.net/?retryWrites=true&w=majority',
+// impotation pour utilisation des variables d'environements
+
+const dotenv = require('dotenv');
+const result = dotenv.config();
+if (result.error) {
+  throw result.error
+}
+console.log(result.parsed);
+// connexion a MongoAtlas
+mongoose.connect(`mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.pbtvn.mongodb.net/?retryWrites=true&w=majority`,
   {
     useNewUrlParser: true,
     useUnifiedTopology: true
   })
   .then(() => console.log('Connexion à MongoDB réussie !'))
   .catch(() => console.log('Connexion à MongoDB échouée !'));
+
 const app = express();
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
