@@ -27,6 +27,7 @@ exports.signup = (req, res, next) => {
 };
 
 exports.login = (req, res, next) => {
+  const emailCryptoJs = cryptojs.HmacSHA256(req.body.email, `${process.env.CRYPTOJS_EMAIL}`).toString();
   User.findOne({ email: emailCryptoJs })
     .then(user => {
       if (!user) {
@@ -41,7 +42,7 @@ exports.login = (req, res, next) => {
             userId: user._id,
             token: jwt.sign(
               { userId: user._id },
-              'RANDOM_TOKEN_SECRET',
+              `${process.env.JWT_KEY_TOKEN}`,
               { expiresIn: '24h' }
             )
           });

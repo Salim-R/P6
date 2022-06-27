@@ -6,7 +6,7 @@ const auth = require('../middleware/auth');
 const stuffCtrl = require('../controllers/sauce');
 
 
-// Les différentes routes avec les middlewares de gestion d'images et d'auth
+// Les différentes routes avec les middlewares de gestion d'image avec multer, et d'auth avec jsonwebtoken
 
 router.get('/', auth, stuffCtrl.getAllThing);
 router.post('/', auth, multer, stuffCtrl.createThing);
