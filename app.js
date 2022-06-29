@@ -1,5 +1,4 @@
 // app.js gere tt les requetes envoyée par le serveur
-
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
@@ -40,7 +39,7 @@ app.use(express.json());
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
 
-app.use(helmet({ crossOriginResourcePolicy: { policy: "same-site" } }));
+app.use(helmet());
 
 app.use('/api/auth', userRoutes);
 app.use('/api/sauces', sauceRoutes);

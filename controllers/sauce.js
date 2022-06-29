@@ -6,6 +6,7 @@ exports.createThing = (req, res, next) => {
 
   // lecture de l'objet sauce en requête
   const sauceObject = JSON.parse(req.body.sauce);
+  // suppression du champ_userId de la requête envoyée par le client(rien ne l’empêcherait de nous passer le userId d’une autre personne). 
   delete sauceObject._id;
   delete sauceObject._userId;
   // Construction de l'objet sauce avec image
@@ -32,6 +33,7 @@ exports.createThing = (req, res, next) => {
 //     .then(things => res.status(200).json(things))
 //     .catch(error => res.status(400).json({ error }));
 // }; 
+
 //méthode ECMASCRIPT 2017
 exports.getAllThing = async (req, res, next) => {
   try {
@@ -60,26 +62,47 @@ exports.getOneThing = async (req, res, next) => {
 };
 // Modification d'une sauce
 exports.modifyThing = (req, res, next) => {
-  const sauceObject = req.file ? {
-    ...JSON.parse(req.body.sauce),
-    imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
-  } : { ...req.body };
 
-  delete sauceObject._userId;
   Sauce.findOne({ _id: req.params.id })
     .then((sauce) => {
-      if (sauce.userId != req.auth.userId) {
-        res.status(401).json({ message: 'Not authorized' });
-      } else {
+      if (sauce.userId === sauce.userId) {
+
+        if (req.file) {
+          Sauce
+            .findOne({ _id: req.params.id })
+            .then((sauce) => {
+              console.log(sauce);
+
+              //récup du nom de la photo a supprimmer
+              const filename = sauce.imageUrl.split('/images/')[1];
+              fs.unlink(`images/${filename}`, (error) => {
+                if (error) throw error;
+              })
+            })
+            .catch(error => res.status(404).json({ error }));
+        } else {
+          console.log("FALSE");
+        }
+        // l'objet qui va etre maj dans la bdd
+
+        const sauceObject = req.file ? {
+          ...JSON.parse(req.body.sauce),
+          imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
+        } : { ...req.body }; //<= sinon
+
+        //modification qui seront envoyé dans la bdd
         Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id })
-          .then(() => res.status(200).json({ message: 'Objet modifié!' }))
-          .catch(error => res.status(401).json({ error }));
+          .then(() => res.status(200).json({ message: 'Objet modifié!', contenu: sauceObject, }))
+          .catch(error => res.status(404).json({ error }));
+      } else {
+        console.log("UserId différent de userId dans l'objet non-autorisé")
       }
+
     })
-    .catch((error) => {
-      res.status(400).json({ error });
-    });
-};
+    .catch(error => res.status(403).json({ error }));
+}
+
+
 
 //Suppression d'une sauce
 exports.deleteThing = (req, res, next) => {
@@ -110,11 +133,9 @@ exports.likeFicheUser = async (req, res, next) => {
 
     //mise en place d'un switch case()
     switch (req.body.like) {
-
       case 1:
         //si le userliked est false et si like ===1
         if (!sauce.usersLiked.includes(req.body.userId) && req.body.like === 1) {
-
           Sauce.updateOne(
             { _id: req.params.id },
             {
