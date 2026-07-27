@@ -1,11 +1,14 @@
 const express = require('express');
-const router = express.Router();
-const password = require("../middleware/password");
-const controlEmail = require("../middleware/controlEmail");
+
+const controlEmail = require('../middleware/controlEmail');
+const checkPassword = require('../middleware/password');
 const userCtrl = require('../controllers/user');
 
-// Les différentes routes avec les middlewares de controle d'email et password avec validator et password-validator
-router.post('/signup', controlEmail, password, userCtrl.signup);
+const router = express.Router();
+
+// L'e-mail et la robustesse du mot de passe sont valides avant d'atteindre
+// le controleur.
+router.post('/signup', controlEmail, checkPassword, userCtrl.signup);
 router.post('/login', userCtrl.login);
 
 module.exports = router;

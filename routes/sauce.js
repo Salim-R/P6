@@ -1,18 +1,17 @@
 const express = require('express');
-const router = express.Router();
-const multer = require('../middleware/multer-config');
+
 const auth = require('../middleware/auth');
+const upload = require('../middleware/multer-config');
+const sauceCtrl = require('../controllers/sauce');
 
-const stuffCtrl = require('../controllers/sauce');
+const router = express.Router();
 
-
-// Les différentes routes avec les middlewares de gestion d'image avec multer, et d'auth avec jsonwebtoken
-
-router.get('/', auth, stuffCtrl.getAllThing);
-router.post('/', auth, multer, stuffCtrl.createThing);
-router.get('/:id', auth, stuffCtrl.getOneThing);
-router.put('/:id', auth, multer, stuffCtrl.modifyThing);
-router.delete('/:id', auth, stuffCtrl.deleteThing);
-router.post("/:id/like", auth, stuffCtrl.likeFicheUser);
+// Toutes les routes sauces exigent un jeton valide.
+router.get('/', auth, sauceCtrl.getAllSauces);
+router.post('/', auth, upload, sauceCtrl.createSauce);
+router.get('/:id', auth, sauceCtrl.getOneSauce);
+router.put('/:id', auth, upload, sauceCtrl.modifySauce);
+router.delete('/:id', auth, sauceCtrl.deleteSauce);
+router.post('/:id/like', auth, sauceCtrl.rateSauce);
 
 module.exports = router;

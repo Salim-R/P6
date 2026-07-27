@@ -1,49 +1,51 @@
-// app.js gere tt les requetes envoyée par le serveur
-const express = require('express');
-const mongoose = require('mongoose');
+require('dotenv').config();
+
 const path = require('path');
+const express = require('express');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const cors = require('cors');
 
 const sauceRoutes = require('./routes/sauce');
 const userRoutes = require('./routes/user');
 
-// impotation pour utilisation des variables d'environements
-
-const dotenv = require('dotenv');
-const result = dotenv.config();
-if (result.error) {
-  throw result.error
-}
-console.log(result.parsed);
-// connexion a MongoAtlas
-mongoose.connect(`mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.pbtvn.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`,
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-  })
-  .then(() => console.log('Connexion à MongoDB réussie !'))
-  .catch(() => console.log('Connexion à MongoDB échouée !'));
-
+// app.js ne fait que decrire l'application Express.
+// La connexion a la base et le demarrage du serveur sont dans server.js,
+// ce qui permet de tester l'app sans ouvrir de connexion reseau.
 const app = express();
 
-//logger les req et res
-app.use(morgan("dev"));
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-  next();
-});
+app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
+app.use(cors());
 app.use(express.json());
+
+if (process.env.NODE_ENV !== 'test') {
+  app.use(morgan('dev'));
+}
+
+// Les images uploadees sont servies en statique.
 app.use('/images', express.static(path.join(__dirname, 'images')));
-
-
-app.use(helmet());
 
 app.use('/api/auth', userRoutes);
 app.use('/api/sauces', sauceRoutes);
 
+// Route inconnue.
+app.use((req, res) => {
+  res.status(404).json({ message: 'Route introuvable' });
+});
 
+// Gestionnaire d'erreurs central : toute erreur passee a next() arrive ici.
+// Express identifie ce middleware par sa signature a quatre arguments, le
+// parametre next doit donc rester present meme s'il n'est pas utilise.
+app.use((error, req, res, next) => {
+  const status = error.status || 500;
+
+  if (status === 500) {
+    console.error(error);
+  }
+
+  res.status(status).json({
+    message: status === 500 ? 'Erreur serveur' : error.message,
+  });
+});
 
 module.exports = app;
