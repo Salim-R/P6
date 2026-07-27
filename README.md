@@ -1,84 +1,148 @@
-# API de notation de sauces — projet OpenClassrooms (P6)
+# API de notation de sauces
 
-API REST développée pendant ma formation de développeur web (OpenClassrooms,
-projet 6 « Piiquante »). L'exercice consistait à construire le back-end d'une
-application de notation de sauces piquantes, avec un accent particulier sur la
-sécurité de l'authentification et des données.
+API REST Node.js / Express / MongoDB : comptes utilisateurs, catalogue de
+sauces avec images, et système de votes limité à une voix par personne.
 
-Le front-end (dossier `frontend/`, en Angular) était fourni par l'école. Mon
-travail porte sur l'API.
+Le projet vient d'un exercice de ma formation (OpenClassrooms, 2022). Je l'ai
+repris en 2026 pour le remettre à niveau : correction de bugs, dont deux failles
+d'autorisation, mise à jour des dépendances, réécriture de la logique de vote et
+mise en place de tests. Le dossier `frontend/` (Angular) était fourni avec
+l'énoncé, mon travail porte sur l'API.
 
 ## Stack
 
-- Node.js et Express
-- MongoDB avec Mongoose
-- Architecture MVC : `routes/`, `controllers/`, `models/`, `middleware/`
+- Node.js 20+, Express 4
+- MongoDB avec Mongoose 8
+- Authentification JWT, mots de passe hachés avec bcrypt
+- Jest et Supertest pour les tests, ESLint pour le lint
 
-## Ce que j'ai mis en place
+## Architecture
 
-**Authentification**
+```
+config/       connexion à la base
+routes/       définition des endpoints
+controllers/  logique métier
+models/       schémas Mongoose
+middleware/   authentification, validation, upload
+tests/        tests unitaires et d'intégration
+```
 
-- Mots de passe hachés avec bcrypt avant enregistrement
-- Jetons JWT signés, valides 24h, vérifiés par un middleware `auth` sur
-  l'ensemble des routes sauces
-- Adresses e-mail hachées avec HMAC-SHA256 (crypto-js) et une clé en variable
-  d'environnement : la base ne contient aucun e-mail en clair, la comparaison
-  à la connexion se fait sur le hash
+## Sécurité
 
-**Validation et durcissement**
+- Mots de passe hachés avec bcrypt (10 tours) avant enregistrement
+- Jetons JWT valides 24 h, vérifiés par un middleware sur toutes les routes
+  `/api/sauces`
+- Adresses e-mail stockées sous forme d'empreinte HMAC-SHA256 avec clé secrète.
+  C'est une empreinte, pas un chiffrement : elle n'est pas réversible, ce qui
+  suffit puisqu'on n'a besoin que de retrouver un compte à la connexion
+- Politique de mot de passe imposée côté serveur, avec retour au client des
+  règles non respectées
+- Connexion et inscription renvoient le même message d'erreur pour un compte
+  inexistant et un mot de passe faux, afin de ne pas révéler quelles adresses
+  sont enregistrées
+- En-têtes HTTP durcis via Helmet
+- Upload restreint aux images jpg, png et webp, limité à 2 Mo, avec noms de
+  fichiers assainis
+- Secrets sortis du code dans un `.env`, vérifiés au démarrage
 
-- Politique de mot de passe imposée côté serveur (`middleware/password.js`)
-- Contrôle du format des e-mails (`middleware/controlEmail.js`) et unicité en
-  base via mongoose-unique-validator
-- En-têtes HTTP sécurisés avec Helmet
-- Secrets sortis du code dans un `.env` (dotenv)
-- Upload limité aux images jpg, jpeg et png par un dictionnaire de types MIME,
-  fichiers renommés avec un horodatage (multer)
+## Ce que la reprise de 2026 a corrigé
 
-**Fonctionnel**
+**Deux failles d'autorisation**
 
-- CRUD complet sur les sauces
-- Likes et dislikes avec une règle d'un seul vote par utilisateur : les
-  identifiants sont stockés dans `usersLiked` / `usersDisliked` et vérifiés
-  avant chaque incrément
-- Journalisation des requêtes avec morgan
+- La modification d'une sauce comparait `sauce.userId` avec lui-même : la
+  condition était toujours vraie, donc n'importe quel compte authentifié pouvait
+  modifier la sauce d'un autre. Le contrôle se fait maintenant contre l'identité
+  du jeton.
+- La mise à jour recopiait le corps de la requête sans filtrage, ce qui
+  permettait de se déclarer propriétaire d'une sauce ou de falsifier les
+  compteurs de votes. Ces champs sont désormais retirés côté serveur.
+
+**Le système de votes, réécrit**
+
+L'ancienne version n'attendait pas ses appels à la base, ne répondait pas du
+tout dans certains cas (la requête restait en attente jusqu'au timeout) et
+pouvait envoyer deux réponses pour un même appel. Elle se fiait également à
+l'identifiant transmis dans le corps de la requête, donc à une identité fournie
+par le client.
+
+Les compteurs sont maintenant recalculés depuis la longueur des tableaux de
+votants au lieu d'être incrémentés : l'opération devient idempotente et un
+compteur désynchronisé se corrige de lui-même au vote suivant.
+
+**Autres corrections**
+
+- Deux blocs `catch` référençaient une variable inexistante : la réponse
+  d'erreur levait elle-même une exception
+- Le port par défaut était `process.env.PORT || process.env.PORT`, donc
+  `undefined` sans variable d'environnement
+- Le middleware d'authentification renvoyait `new Error(...)` dans du JSON, ce
+  qui arrive côté client comme un objet vide
+- Le message d'erreur du validateur de mot de passe était mal construit et
+  affichait `[object Object]`
+- Un corps de requête sans e-mail faisait tomber le serveur en 500
+- Les fichiers d'un type non prévu étaient enregistrés avec une extension
+  `undefined`
+
+**Modernisation**
+
+- Mongoose 6 → 8, jsonwebtoken 8 → 9, bcrypt 5 → 6, Helmet 5 → 8,
+  multer 1 → 2, crypto-js → 4.2 (correctif de sécurité)
+- `mongoose-unique-validator` retiré, non maintenu et incompatible avec
+  Mongoose 8 : les conflits d'unicité sont traités via le code d'erreur 11000
+- CORS géré par le paquet `cors` au lieu d'en-têtes écrits à la main
+- Gestionnaire d'erreurs central et réponse 404 en JSON
+- Connexion à la base déplacée dans `server.js`, ce qui rend l'app testable
+  sans ouvrir de connexion réseau
+- Nommage repris (`getAllThing`, `stuffCtrl`, `likeFicheUser` étaient des restes
+  du tutoriel)
 
 ## Endpoints
 
-Toutes les routes `/api/sauces` exigent un JWT valide.
+Toutes les routes `/api/sauces` exigent un en-tête `Authorization: Bearer <jwt>`.
 
-```
-POST   /api/auth/signup       création de compte
-POST   /api/auth/login        connexion, renvoie un JWT (24h)
+| Méthode | Route | Description |
+|---|---|---|
+| POST | `/api/auth/signup` | Création de compte |
+| POST | `/api/auth/login` | Connexion, renvoie un JWT valable 24 h |
+| GET | `/api/sauces` | Liste des sauces |
+| GET | `/api/sauces/:id` | Détail d'une sauce |
+| POST | `/api/sauces` | Création, avec image |
+| PUT | `/api/sauces/:id` | Modification (propriétaire uniquement) |
+| DELETE | `/api/sauces/:id` | Suppression (propriétaire uniquement) |
+| POST | `/api/sauces/:id/like` | Vote : `1`, `-1` ou `0` pour annuler |
 
-GET    /api/sauces            liste des sauces
-GET    /api/sauces/:id        détail d'une sauce
-POST   /api/sauces            création, avec image
-PUT    /api/sauces/:id        modification, image optionnelle
-DELETE /api/sauces/:id        suppression
-POST   /api/sauces/:id/like   like (1), dislike (-1) ou annulation (0)
-```
-
-## Lancer le projet
+## Installation
 
 ```bash
 git clone https://github.com/Salim-R/Next-Shop.git
 cd Next-Shop
 npm install
-npm start
+cp .env.example .env   # puis renseigner les valeurs
+npm run dev
 ```
 
-Un fichier `.env` est nécessaire à la racine :
+L'API démarre sur http://localhost:3000. Les variables d'environnement sont
+vérifiées au lancement : si l'une manque, le serveur s'arrête en indiquant
+laquelle.
 
-```
-DB_USERNAME=...
-DB_PASSWORD=...
-DB_NAME=...
-JWT_KEY_TOKEN=...
-CRYPTOJS_EMAIL=...
-```
+## Scripts
 
-L'API démarre sur http://localhost:3000
+| Commande | Effet |
+|---|---|
+| `npm run dev` | démarrage avec rechargement automatique |
+| `npm start` | démarrage en production |
+| `npm test` | tests Jest |
+| `npm run lint` | ESLint |
+
+## Tests
+
+13 tests couvrent le middleware d'authentification (jeton manquant, mal formé,
+invalide, expiré), la validation des e-mails et des mots de passe, et la réponse
+404. Ils tournent sans base de données.
+
+```bash
+npm test
+```
 
 ---
 
