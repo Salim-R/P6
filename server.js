@@ -1,47 +1,55 @@
+require('dotenv').config();
+
 const http = require('http');
 const app = require('./app');
+const connectDatabase = require('./config/database');
 
-const normalizePort = val => {
-  const port = parseInt(val, 10);
+const normalizePort = (value) => {
+  const port = parseInt(value, 10);
 
-  if (isNaN(port)) {
-    return val;
+  if (Number.isNaN(port)) {
+    return value;
   }
-  if (port >= 0) {
-    return port;
-  }
-  return false;
+  return port >= 0 ? port : false;
 };
-const port = normalizePort(process.env.PORT || process.env.PORT);
+
+// Le port par defaut manquait : sans variable PORT, le serveur ecoutait sur
+// une valeur undefined.
+const port = normalizePort(process.env.PORT || 3000);
 app.set('port', port);
 
-const errorHandler = error => {
+const server = http.createServer(app);
+
+server.on('error', (error) => {
   if (error.syscall !== 'listen') {
     throw error;
   }
-  const address = server.address();
-  const bind = typeof address === 'string' ? 'pipe ' + address : 'port: ' + port;
+
+  const bind = typeof port === 'string' ? `pipe ${port}` : `port ${port}`;
+
   switch (error.code) {
     case 'EACCES':
-      console.error(bind + ' requires elevated privileges.');
+      console.error(`${bind} necessite des privileges eleves.`);
       process.exit(1);
       break;
     case 'EADDRINUSE':
-      console.error(bind + ' is already in use.');
+      console.error(`${bind} est deja utilise.`);
       process.exit(1);
       break;
     default:
       throw error;
   }
-};
-
-const server = http.createServer(app);
-
-server.on('error', errorHandler);
-server.on('listening', () => {
-  const address = server.address();
-  const bind = typeof address === 'string' ? 'pipe ' + address : 'port ' + port;
-  console.log('Listening on ' + bind);
 });
 
-server.listen(port);
+server.on('listening', () => {
+  console.log(`API en ecoute sur le port ${port}`);
+});
+
+// On attend la base avant d'accepter des requetes : inutile de repondre a des
+// clients si la persistance n'est pas disponible.
+connectDatabase()
+  .then(() => server.listen(port))
+  .catch((error) => {
+    console.error('Demarrage impossible :', error.message);
+    process.exit(1);
+  });
