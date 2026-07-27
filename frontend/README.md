@@ -1,27 +1,68 @@
-# HotTakes
+# Piiquante — client Angular 20
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 13.2.4.
+Interface du catalogue de sauces : consultation, publication, modification et
+votes. Elle consomme l'API du dossier parent.
 
-## Development server
+## Lancer le projet
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+L'API doit tourner sur `http://localhost:3000` (voir le README à la racine).
 
-## Code scaffolding
+```bash
+npm install
+npm start
+```
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+L'application est servie sur http://localhost:4200
 
-## Build
+## Stack
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+- Angular 20, composants **standalone** (plus de NgModule)
+- **Signals** pour l'état local et la session
+- Nouveau flux de contrôle `@if` / `@for` dans les templates
+- Formulaires réactifs **typés** (`NonNullableFormBuilder`)
+- `ChangeDetectionStrategy.OnPush` sur tous les composants
+- SCSS avec variables CSS, thème clair et sombre
+- Aucune librairie de composants : tout le style est écrit à la main
 
-## Running unit tests
+## Structure
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+```
+src/app/
+  core/                services, garde, intercepteur, modèles
+  layout/              en-tête
+  features/auth/       connexion, inscription
+  features/sauces/     liste, détail, formulaire, jauge de force
+  app.routes.ts        routes en lazy loading
+  app.config.ts        providers (routeur, HTTP, intercepteur)
+```
 
-## Running end-to-end tests
+## Choix techniques
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+**Chargement différé par route.** Chaque écran est un chunk séparé
+(`loadComponent`) : le bundle initial ne contient que la coquille et l'écran
+demandé.
 
-## Further help
+**Session dans un signal.** `AuthService` expose `isAuthenticated` et `userId`
+en signaux calculés. Les composants les lisent directement, sans souscription à
+gérer ni risque de fuite mémoire. La session est conservée en `sessionStorage`
+pour survivre à un rechargement de page.
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+**Intercepteur fonctionnel.** Il ajoute le jeton quand il existe et déconnecte
+l'utilisateur si l'API répond 401.
+
+**Garde fonctionnelle.** Elle mémorise la page demandée dans un paramètre
+`redirect` et y ramène après connexion.
+
+**Votes.** L'API renvoie les compteurs à jour après chaque vote : l'état local
+est reconstruit depuis sa réponse, sans recharger la liste.
+
+**Thème.** Un `effect` synchronise la classe sur `<html>` et le stockage local.
+Au premier chargement, la préférence système est respectée.
+
+## Scripts
+
+| Commande | Effet |
+|---|---|
+| `npm start` | serveur de développement |
+| `npm run build` | build de production |
+| `npm test` | tests unitaires (Karma) |

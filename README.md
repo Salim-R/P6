@@ -6,8 +6,11 @@ sauces avec images, et système de votes limité à une voix par personne.
 Le projet vient d'un exercice de ma formation (OpenClassrooms, 2022). Je l'ai
 repris en 2026 pour le remettre à niveau : correction de bugs, dont deux failles
 d'autorisation, mise à jour des dépendances, réécriture de la logique de vote et
-mise en place de tests. Le dossier `frontend/` (Angular) était fourni avec
-l'énoncé, mon travail porte sur l'API.
+mise en place de tests. Le front-end fourni avec l'énoncé (Angular 13) a été
+entièrement reconstruit en **Angular 20**.
+
+- **API** : ce dossier — Node.js, Express, MongoDB
+- **Client** : [`frontend/`](./frontend) — Angular 20, voir son README
 
 ## Stack
 
@@ -95,6 +98,27 @@ compteur désynchronisé se corrige de lui-même au vote suivant.
   sans ouvrir de connexion réseau
 - Nommage repris (`getAllThing`, `stuffCtrl`, `likeFicheUser` étaient des restes
   du tutoriel)
+
+## Le client, reconstruit en Angular 20
+
+Le front-end fourni avec l'énoncé était en Angular 13 (fin de support, plus
+aucun correctif de sécurité). Plutôt qu'enchaîner sept montées de version, je
+l'ai reconstruit sur des bases actuelles : l'application ne comptait que six
+écrans, la réécriture était plus rapide et plus propre qu'une migration.
+
+- Composants **standalone**, plus aucun NgModule
+- **Signals** pour la session et l'état local, à la place des BehaviorSubject
+- Nouveau flux de contrôle `@if` / `@for`
+- Formulaires réactifs **typés**, sans assertions non nulles
+- Garde et intercepteur **fonctionnels** (le style classe est déprécié)
+- Chargement différé par route
+- `OnPush` sur tous les composants
+- Thème clair et sombre, style écrit à la main, sans librairie de composants
+
+**Effet sur le bundle initial : 3,87 Mo → 287 Ko** (81 Ko transférés), chaque
+écran étant désormais un chunk chargé à la demande.
+
+Détail des choix dans le [README du client](./frontend).
 
 ## Endpoints
 

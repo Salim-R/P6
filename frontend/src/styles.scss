@@ -1,13 +1,272 @@
-/* You can add global styles to this file, and also import other style files */
+/* ==========================================================================
+   Système de design
+   Un seul jeu de variables, décliné en thème clair et sombre. Les composants
+   ne référencent que ces variables : changer de thème ne demande aucune
+   modification dans les composants.
+   ========================================================================== */
 
-html, body { height: 100%; }
-body {
-  font-family: "Source Sans Pro", sans-serif ;
-  letter-spacing: 0.1em;
-  margin: 0;
-  white-space: pre-line;
+:root {
+  --bg: #0b0d10;
+  --bg-elevated: #14171c;
+  --bg-hover: #1b1f26;
+  --border: #262b33;
+  --border-strong: #363d47;
+
+  --text: #f2f4f7;
+  --text-muted: #98a2b3;
+  --text-subtle: #667085;
+
+  --accent: #ff5a1f;
+  --accent-hover: #ff7a45;
+  --accent-soft: rgba(255, 90, 31, 0.12);
+  --accent-contrast: #ffffff;
+
+  --success: #12b76a;
+  --danger: #f04438;
+  --danger-soft: rgba(240, 68, 56, 0.12);
+
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 16px;
+  --radius-full: 999px;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-8: 3rem;
+  --space-10: 4rem;
+
+  --font: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+  --text-3xl: 2.25rem;
+
+  --transition: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  color-scheme: dark;
 }
 
-mat-spinner {
-  margin: auto;
+/* Thème clair : la classe .light est posée sur <html>. */
+:root.light {
+  --bg: #fbfbfc;
+  --bg-elevated: #ffffff;
+  --bg-hover: #f4f5f7;
+  --border: #e4e7ec;
+  --border-strong: #d0d5dd;
+
+  --text: #14171c;
+  --text-muted: #475467;
+  --text-subtle: #98a2b3;
+
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.06);
+  --shadow: 0 8px 24px rgba(16, 24, 40, 0.08);
+
+  color-scheme: light;
+}
+
+/* ---------- Base ---------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  font-weight: 650;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---------- Éléments réutilisables ---------- */
+
+.card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background var(--transition),
+    border-color var(--transition),
+    transform var(--transition);
+
+  &:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: var(--accent-contrast);
+
+  &:hover:not(:disabled) {
+    background: var(--accent-hover);
+  }
+}
+
+.btn-ghost {
+  background: transparent;
+  border-color: var(--border-strong);
+  color: var(--text);
+
+  &:hover:not(:disabled) {
+    background: var(--bg-hover);
+  }
+}
+
+.btn-danger {
+  background: transparent;
+  border-color: var(--danger);
+  color: var(--danger);
+
+  &:hover:not(:disabled) {
+    background: var(--danger-soft);
+  }
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-5);
+}
+
+.label {
+  font-size: var(--text-sm);
+  font-weight: 550;
+  color: var(--text-muted);
+}
+
+.input {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: var(--text-base);
+  transition:
+    border-color var(--transition),
+    box-shadow var(--transition);
+
+  &::placeholder {
+    color: var(--text-subtle);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+}
+
+textarea.input {
+  resize: vertical;
+  min-height: 7rem;
+}
+
+.alert-danger {
+  padding: var(--space-3) var(--space-4);
+  background: var(--danger-soft);
+  border: 1px solid var(--danger);
+  border-radius: var(--radius);
+  color: var(--danger);
+  font-size: var(--text-sm);
+}
+
+.spinner {
+  width: 2rem;
+  height: 2rem;
+  margin: var(--space-10) auto;
+  border: 2px solid var(--border-strong);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 700ms linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
