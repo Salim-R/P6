@@ -44,7 +44,7 @@ import { HeatGaugeComponent } from './heat-gauge.component';
               type="button"
               class="vote"
               [class.active]="myVote() === 1"
-              [disabled]="voting()"
+              [disabled]="voting() || !isLogged()"
               (click)="cast(1)"
             >
               ▲ J'aime
@@ -55,13 +55,19 @@ import { HeatGaugeComponent } from './heat-gauge.component';
               type="button"
               class="vote down"
               [class.active]="myVote() === -1"
-              [disabled]="voting()"
+              [disabled]="voting() || !isLogged()"
               (click)="cast(-1)"
             >
               ▼ Je n'aime pas
               <span class="n">{{ item.dislikes }}</span>
             </button>
           </div>
+
+          @if (!isLogged()) {
+            <p class="vote-hint">
+              <a routerLink="/login">Connectez-vous</a> pour donner votre avis.
+            </p>
+          }
 
           @if (isOwner()) {
             <div class="owner-actions">
@@ -196,6 +202,21 @@ import { HeatGaugeComponent } from './heat-gauge.component';
       font-variant-numeric: tabular-nums;
     }
 
+    .vote-hint {
+      margin-top: var(--space-3);
+      font-size: var(--text-sm);
+      color: var(--text-subtle);
+
+      a {
+        color: var(--accent);
+        font-weight: 550;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+
     .owner-actions {
       display: flex;
       gap: var(--space-3);
@@ -229,7 +250,11 @@ export class SauceDetailComponent implements OnInit {
   protected readonly error = signal('');
   protected readonly voting = signal(false);
 
-  protected readonly isOwner = computed(() => this.sauce()?.userId === this.auth.userId());
+  protected readonly isLogged = this.auth.isAuthenticated;
+
+  protected readonly isOwner = computed(
+    () => this.isLogged() && this.sauce()?.userId === this.auth.userId(),
+  );
 
   /** Vote de l'utilisateur courant, déduit des tableaux renvoyés par l'API. */
   protected readonly myVote = computed<Vote>(() => {
@@ -257,7 +282,7 @@ export class SauceDetailComponent implements OnInit {
   /** Cliquer sur son vote actuel l'annule. */
   protected cast(value: Vote): void {
     const item = this.sauce();
-    if (!item || this.voting()) return;
+    if (!item || this.voting() || !this.isLogged()) return;
 
     const next: Vote = this.myVote() === value ? 0 : value;
     this.voting.set(true);

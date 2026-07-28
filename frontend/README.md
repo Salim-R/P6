@@ -36,6 +36,18 @@ src/app/
   app.config.ts        providers (routeur, HTTP, intercepteur)
 ```
 
+## Accès
+
+Le catalogue et le détail d'une sauce sont **consultables sans compte**. Publier,
+modifier, supprimer et voter demandent une connexion.
+
+Un compte de démonstration est proposé directement sur l'écran de connexion,
+avec un bouton de remplissage automatique :
+
+```
+demo@piiquante.fr · Demo1234
+```
+
 ## Choix techniques
 
 **Chargement différé par route.** Chaque écran est un chunk séparé

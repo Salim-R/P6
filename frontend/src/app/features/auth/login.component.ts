@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
+import { DEMO_ACCOUNT } from '../../core/api.config';
 import { AuthService } from '../../core/auth.service';
 
 @Component({
@@ -13,7 +14,15 @@ import { AuthService } from '../../core/auth.service';
     <section class="wrapper">
       <div class="card panel">
         <h1>Connexion</h1>
-        <p class="subtitle">Accédez au catalogue et donnez votre avis.</p>
+        <p class="subtitle">Donnez votre avis et publiez vos sauces.</p>
+
+        <div class="demo">
+          <p class="demo-title">Compte de démonstration</p>
+          <p class="demo-creds">{{ DEMO.email }} · {{ DEMO.password }}</p>
+          <button type="button" class="demo-fill" (click)="useDemo()">
+            Remplir automatiquement
+          </button>
+        </div>
 
         <form [formGroup]="form" (ngSubmit)="submit()">
           <div class="field">
@@ -83,6 +92,43 @@ import { AuthService } from '../../core/auth.service';
       font-size: var(--text-sm);
     }
 
+    .demo {
+      margin-bottom: var(--space-6);
+      padding: var(--space-4);
+      background: var(--accent-soft);
+      border: 1px dashed var(--accent);
+      border-radius: var(--radius);
+    }
+
+    .demo-title {
+      font-size: var(--text-xs);
+      font-weight: 650;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+    }
+
+    .demo-creds {
+      margin-top: var(--space-1);
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+      word-break: break-all;
+    }
+
+    .demo-fill {
+      margin-top: var(--space-3);
+      padding: 0;
+      background: none;
+      border: none;
+      color: var(--accent);
+      font-family: inherit;
+      font-size: var(--text-sm);
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
     .submit {
       margin-top: var(--space-5);
     }
@@ -121,6 +167,17 @@ export class LoginComponent {
 
   protected readonly pending = signal(false);
   protected readonly error = signal('');
+
+  /**
+   * Compte de démonstration, volontairement public : il permet d'essayer les
+   * fonctions protégées sans créer de compte. Il doit être créé une fois en
+   * base après le déploiement (voir le README).
+   */
+  protected readonly DEMO = DEMO_ACCOUNT;
+
+  protected useDemo(): void {
+    this.form.setValue({ email: DEMO_ACCOUNT.email, password: DEMO_ACCOUNT.password });
+  }
 
   protected submit(): void {
     if (this.form.invalid || this.pending()) {

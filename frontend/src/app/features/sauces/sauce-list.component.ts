@@ -2,6 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
+import { AuthService } from '../../core/auth.service';
 import { Sauce } from '../../core/sauce.model';
 import { SaucesService } from '../../core/sauces.service';
 import { HeatGaugeComponent } from './heat-gauge.component';
@@ -20,7 +21,11 @@ import { HeatGaugeComponent } from './heat-gauge.component';
           }
         </p>
       </div>
-      <a class="btn btn-primary" routerLink="/sauces/nouvelle">Ajouter une sauce</a>
+      @if (auth.isAuthenticated()) {
+        <a class="btn btn-primary" routerLink="/sauces/nouvelle">Ajouter une sauce</a>
+      } @else {
+        <a class="btn btn-ghost" routerLink="/login">Se connecter pour contribuer</a>
+      }
     </header>
 
     @if (loading()) {
@@ -30,8 +35,13 @@ import { HeatGaugeComponent } from './heat-gauge.component';
     } @else if (sauces().length === 0) {
       <div class="card empty">
         <p class="empty-title">Le catalogue est vide</p>
-        <p class="empty-text">Ajoutez la première sauce pour lancer les votes.</p>
-        <a class="btn btn-primary" routerLink="/sauces/nouvelle">Ajouter une sauce</a>
+        @if (auth.isAuthenticated()) {
+          <p class="empty-text">Ajoutez la première sauce pour lancer les votes.</p>
+          <a class="btn btn-primary" routerLink="/sauces/nouvelle">Ajouter une sauce</a>
+        } @else {
+          <p class="empty-text">Connectez-vous pour publier la première sauce.</p>
+          <a class="btn btn-primary" routerLink="/login">Se connecter</a>
+        }
       </div>
     } @else {
       <ul class="grid">
@@ -167,6 +177,7 @@ import { HeatGaugeComponent } from './heat-gauge.component';
 })
 export class SauceListComponent implements OnInit {
   private readonly sauces_ = inject(SaucesService);
+  protected readonly auth = inject(AuthService);
 
   protected readonly sauces = signal<Sauce[]>([]);
   protected readonly loading = signal(true);

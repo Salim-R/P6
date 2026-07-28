@@ -18,10 +18,11 @@ export const routes: Routes = [
     title: 'Inscription · Piiquante',
     loadComponent: () => import('./features/auth/signup.component').then((m) => m.SignupComponent),
   },
+  // Consultation libre : le catalogue et le détail d'une sauce sont visibles
+  // sans compte. Seule la contribution est protégée.
   {
     path: 'sauces',
     title: 'Les sauces · Piiquante',
-    canActivate: [authGuard],
     loadComponent: () =>
       import('./features/sauces/sauce-list.component').then((m) => m.SauceListComponent),
   },
@@ -35,7 +36,6 @@ export const routes: Routes = [
   {
     path: 'sauces/:id',
     title: 'Détail · Piiquante',
-    canActivate: [authGuard],
     loadComponent: () =>
       import('./features/sauces/sauce-detail.component').then((m) => m.SauceDetailComponent),
   },

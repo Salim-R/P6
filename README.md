@@ -122,18 +122,22 @@ Détail des choix dans le [README du client](./frontend).
 
 ## Endpoints
 
-Toutes les routes `/api/sauces` exigent un en-tête `Authorization: Bearer <jwt>`.
+La **lecture est publique** : un visiteur peut parcourir le catalogue sans
+compte. Contribuer exige un en-tête `Authorization: Bearer <jwt>`.
 
-| Méthode | Route | Description |
-|---|---|---|
-| POST | `/api/auth/signup` | Création de compte |
-| POST | `/api/auth/login` | Connexion, renvoie un JWT valable 24 h |
-| GET | `/api/sauces` | Liste des sauces |
-| GET | `/api/sauces/:id` | Détail d'une sauce |
-| POST | `/api/sauces` | Création, avec image |
-| PUT | `/api/sauces/:id` | Modification (propriétaire uniquement) |
-| DELETE | `/api/sauces/:id` | Suppression (propriétaire uniquement) |
-| POST | `/api/sauces/:id/like` | Vote : `1`, `-1` ou `0` pour annuler |
+| Méthode | Route | Accès | Description |
+|---|---|---|---|
+| POST | `/api/auth/signup` | public | Création de compte |
+| POST | `/api/auth/login` | public | Connexion, renvoie un JWT valable 24 h |
+| GET | `/api/sauces` | **public** | Liste des sauces |
+| GET | `/api/sauces/:id` | **public** | Détail d'une sauce |
+| POST | `/api/sauces` | authentifié | Création, avec image |
+| PUT | `/api/sauces/:id` | propriétaire | Modification |
+| DELETE | `/api/sauces/:id` | propriétaire | Suppression |
+| POST | `/api/sauces/:id/like` | authentifié | Vote : `1`, `-1` ou `0` pour annuler |
+
+*Toutes les routes étaient protégées à l'origine, y compris les lectures :
+personne ne pouvait rien voir sans créer un compte au préalable.*
 
 ## Installation
 
@@ -158,11 +162,28 @@ laquelle.
 | `npm test` | tests Jest |
 | `npm run lint` | ESLint |
 
+## Compte de démonstration
+
+Pour essayer les fonctions protégées sans créer de compte, un compte de
+démonstration est proposé sur l'écran de connexion du client :
+
+```
+demo@piiquante.fr · Demo1234
+```
+
+Il doit être créé une fois en base après le déploiement :
+
+```bash
+curl -X POST http://VOTRE-API/api/auth/signup \
+  -H "Content-Type: application/json" \
+  -d '{"email":"demo@piiquante.fr","password":"Demo1234"}'
+```
+
 ## Tests
 
-13 tests couvrent le middleware d'authentification (jeton manquant, mal formé,
-invalide, expiré), la validation des e-mails et des mots de passe, et la réponse
-404. Ils tournent sans base de données.
+15 tests couvrent le middleware d'authentification (jeton manquant, mal formé,
+invalide, expiré), l'accès public en lecture, la validation des e-mails et des
+mots de passe, et la réponse 404. Ils tournent sans base de données.
 
 ```bash
 npm test

@@ -16,12 +16,12 @@ import { ThemeService } from '../core/theme.service';
           <span class="name">Piiquante</span>
         </a>
 
-        @if (auth.isAuthenticated()) {
-          <nav class="nav">
-            <a routerLink="/sauces" routerLinkActive="active">Les sauces</a>
+        <nav class="nav">
+          <a routerLink="/sauces" routerLinkActive="active">Les sauces</a>
+          @if (auth.isAuthenticated()) {
             <a routerLink="/sauces/nouvelle" routerLinkActive="active">Ajouter</a>
-          </nav>
-        }
+          }
+        </nav>
 
         <div class="actions">
           <button

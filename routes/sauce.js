@@ -6,10 +6,14 @@ const sauceCtrl = require('../controllers/sauce');
 
 const router = express.Router();
 
-// Toutes les routes sauces exigent un jeton valide.
-router.get('/', auth, sauceCtrl.getAllSauces);
+// Lecture publique : un visiteur peut parcourir le catalogue sans compte.
+// Auparavant tout etait protege, y compris les GET : personne ne pouvait voir
+// quoi que ce soit sans s'inscrire.
+router.get('/', sauceCtrl.getAllSauces);
+router.get('/:id', sauceCtrl.getOneSauce);
+
+// Contribuer exige en revanche un jeton valide.
 router.post('/', auth, upload, sauceCtrl.createSauce);
-router.get('/:id', auth, sauceCtrl.getOneSauce);
 router.put('/:id', auth, upload, sauceCtrl.modifySauce);
 router.delete('/:id', auth, sauceCtrl.deleteSauce);
 router.post('/:id/like', auth, sauceCtrl.rateSauce);
