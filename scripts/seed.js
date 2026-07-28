@@ -39,7 +39,9 @@ const CATALOGUE = [
     description:
       'Jalapeños fumés au bois de hêtre, coriandre fraîche et citron vert. ' +
       'Une sauce douce et herbacée, pensée pour les tacos et le poisson grillé.',
-    imageUrl: image('photo-1519666213631-be6e024eac6a'),
+    // Photo de piments bruts : les cliches de bouteilles laissent apparaitre
+    // des marques reelles, ce qui n a pas sa place sur un produit fictif.
+    imageUrl: image('photo-1679846078851-b005e5716f38'),
   },
   {
     name: 'Rouge Absolu',
