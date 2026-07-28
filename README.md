@@ -162,21 +162,28 @@ laquelle.
 | `npm test` | tests Jest |
 | `npm run lint` | ESLint |
 
+## Remplir la base
+
+Une base vide donne un catalogue vide. Un script crée le compte de
+démonstration et un catalogue de huit sauces :
+
+```bash
+npm run seed
+```
+
+```
+npm run seed -- --reset   # vide d'abord les sauces du compte de démo
+```
+
+Le script est idempotent : le relancer n'ajoute pas de doublons.
+
 ## Compte de démonstration
 
-Pour essayer les fonctions protégées sans créer de compte, un compte de
-démonstration est proposé sur l'écran de connexion du client :
+Il est créé par `npm run seed`, et proposé directement sur l'écran de connexion
+du client avec un bouton de remplissage automatique :
 
 ```
 demo@piiquante.fr · Demo1234
-```
-
-Il doit être créé une fois en base après le déploiement :
-
-```bash
-curl -X POST http://VOTRE-API/api/auth/signup \
-  -H "Content-Type: application/json" \
-  -d '{"email":"demo@piiquante.fr","password":"Demo1234"}'
 ```
 
 ## Tests
