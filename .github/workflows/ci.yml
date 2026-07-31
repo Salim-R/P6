@@ -1,0 +1,54 @@
+name: Intégration continue
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  api:
+    name: API · lint et tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Installer les dépendances
+        run: npm ci
+
+      - name: Analyse statique
+        run: npm run lint
+
+      # Aucun service MongoDB n'est déclaré : ces tests portent sur le routage,
+      # le middleware d'authentification et la validation. Ils coupent la mise
+      # en file d'attente de Mongoose pour échouer immédiatement au lieu
+      # d'attendre une connexion qui ne viendra pas.
+      - name: Tests
+        run: npm test
+
+  client:
+    name: Client · compilation Angular
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Installer les dépendances
+        working-directory: frontend
+        run: npm ci
+
+      - name: Compilation de production
+        working-directory: frontend
+        run: npx ng build --configuration production
