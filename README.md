@@ -9,8 +9,8 @@ d'autorisation, mise à jour des dépendances, réécriture de la logique de vot
 mise en place de tests. Le front-end fourni avec l'énoncé (Angular 13) a été
 entièrement reconstruit en **Angular 20**.
 
-- **API** : ce dossier — Node.js, Express, MongoDB
-- **Client** : [`frontend/`](./frontend) — Angular 20, voir son README
+- **API** : ce dossier - Node.js, Express, MongoDB
+- **Client** : [`frontend/`](./frontend) - Angular 20, voir son README
 
 ## Stack
 
@@ -198,5 +198,5 @@ npm test
 
 ---
 
-Réalisé par Salim Rhamoumi — développeur web
+Réalisé par Salim Rhamoumi - développeur web full-stack JavaScript
 [salimrhamoumi.com](https://www.salimrhamoumi.com/)

@@ -1,4 +1,4 @@
-# Piiquante — client Angular 20
+# Piiquante - client Angular 20
 
 Interface du catalogue de sauces : consultation, publication, modification et
 votes. Elle consomme l'API du dossier parent.

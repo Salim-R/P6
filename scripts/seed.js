@@ -156,7 +156,7 @@ async function main() {
   }
 
   const total = await Sauce.countDocuments();
-  console.log(`${ajoutees} sauce(s) ajoutee(s) — ${total} au catalogue`);
+  console.log(`${ajoutees} sauce(s) ajoutee(s) - ${total} au catalogue`);
 }
 
 main()
