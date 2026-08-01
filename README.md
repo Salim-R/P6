@@ -17,6 +17,7 @@ entièrement reconstruit en **Angular 20**.
 - Node.js 20+, Express 4
 - MongoDB avec Mongoose 8
 - Authentification JWT, mots de passe hachés avec bcrypt
+- Limitation de débit sur les routes d'authentification
 - Jest et Supertest pour les tests, ESLint pour le lint
 
 ## Architecture
@@ -188,9 +189,11 @@ demo@piiquante.fr · Demo1234
 
 ## Tests
 
-15 tests couvrent le middleware d'authentification (jeton manquant, mal formé,
+19 tests couvrent le middleware d'authentification (jeton manquant, mal formé,
 invalide, expiré), l'accès public en lecture, la validation des e-mails et des
-mots de passe, et la réponse 404. Ils tournent sans base de données.
+mots de passe, la limitation de débit sur la connexion et la création de compte,
+et la réponse 404. Ils tournent sans base de données : chaque cas s'arrête dans
+un middleware ou sur une validation, avant toute lecture.
 
 ```bash
 npm test

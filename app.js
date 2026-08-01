@@ -14,6 +14,11 @@ const userRoutes = require('./routes/user');
 // ce qui permet de tester l'app sans ouvrir de connexion reseau.
 const app = express();
 
+// Derriere un hebergeur, l'adresse reelle du client arrive dans
+// X-Forwarded-For. Sans cette option, la limitation de debit voit toutes les
+// requetes venir du proxy et compte donc tous les visiteurs comme un seul.
+app.set('trust proxy', 1);
+
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 app.use(cors());
 app.use(express.json());
