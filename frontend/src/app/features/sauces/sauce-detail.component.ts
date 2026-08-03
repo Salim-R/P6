@@ -63,6 +63,10 @@ import { HeatGaugeComponent } from './heat-gauge.component';
             </button>
           </div>
 
+          @if (voteError()) {
+            <p class="vote-hint vote-error" role="alert">{{ voteError() }}</p>
+          }
+
           @if (!isLogged()) {
             <p class="vote-hint">
               <a routerLink="/login">Connectez-vous</a> pour donner votre avis.
@@ -202,6 +206,10 @@ import { HeatGaugeComponent } from './heat-gauge.component';
       font-variant-numeric: tabular-nums;
     }
 
+    .vote-error {
+      color: #dc2626;
+    }
+
     .vote-hint {
       margin-top: var(--space-3);
       font-size: var(--text-sm);
@@ -249,6 +257,7 @@ export class SauceDetailComponent implements OnInit {
   protected readonly loading = signal(true);
   protected readonly error = signal('');
   protected readonly voting = signal(false);
+  protected readonly voteError = signal('');
 
   protected readonly isLogged = this.auth.isAuthenticated;
 
@@ -301,8 +310,16 @@ export class SauceDetailComponent implements OnInit {
             next === -1 ? [...new Set([...item.usersDisliked, me])] : item.usersDisliked.filter((u) => u !== me),
         });
         this.voting.set(false);
+        this.voteError.set('');
       },
-      error: () => this.voting.set(false),
+      // Un échec silencieux laisserait croire que le vote est passé : le bouton
+      // redevient cliquable, les compteurs n'ont pas bougé, et rien ne dit
+      // pourquoi. Le message est placé près des boutons plutôt que dans
+      // `error`, qui remplace toute la page par un état d'erreur.
+      error: (error: HttpErrorResponse) => {
+        this.voting.set(false);
+        this.voteError.set(error.error?.message ?? "Votre vote n'a pas pu être enregistré.");
+      },
     });
   }
 
