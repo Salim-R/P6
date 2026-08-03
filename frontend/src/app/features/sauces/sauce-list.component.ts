@@ -55,9 +55,21 @@ import { HeatGaugeComponent } from './heat-gauge.component';
                 <h2>{{ sauce.name }}</h2>
                 <p class="maker">{{ sauce.manufacturer }}</p>
                 <app-heat-gauge [heat]="sauce.heat" />
+                <!-- Les triangles ne disent rien a un lecteur d'ecran, qui
+                     annoncerait « 12 » puis « 3 » sans preciser lequel est
+                     lequel. role="img" porte le libelle, comme sur la jauge de
+                     force juste au-dessus. -->
                 <div class="votes">
-                  <span class="up">▲ {{ sauce.likes }}</span>
-                  <span class="down">▼ {{ sauce.dislikes }}</span>
+                  <span class="up" role="img" [attr.aria-label]="votesLabel(sauce.likes, true)">
+                    ▲ {{ sauce.likes }}
+                  </span>
+                  <span
+                    class="down"
+                    role="img"
+                    [attr.aria-label]="votesLabel(sauce.dislikes, false)"
+                  >
+                    ▼ {{ sauce.dislikes }}
+                  </span>
                 </div>
               </div>
             </a>
@@ -182,6 +194,17 @@ export class SauceListComponent implements OnInit {
   protected readonly sauces = signal<Sauce[]>([]);
   protected readonly loading = signal(true);
   protected readonly error = signal('');
+
+  /**
+   * Libellé des compteurs de vote pour les lecteurs d'écran.
+   *
+   * L'accord se fait sur le nombre : « 1 j'aime » et « 12 j'aime » se disent
+   * pareil, mais « 0 j'aime » se lit mieux que « aucun j'aime » dans une liste
+   * où l'oreille compare des cartes entre elles.
+   */
+  protected votesLabel(nombre: number, positif: boolean): string {
+    return `${nombre} ${positif ? "j'aime" : "je n'aime pas"}`;
+  }
 
   ngOnInit(): void {
     this.sauces_.list().subscribe({

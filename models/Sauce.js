@@ -11,8 +11,14 @@ const sauceSchema = mongoose.Schema(
     heat: { type: Number, required: true, min: 1, max: 10 },
     likes: { type: Number, default: 0 },
     dislikes: { type: Number, default: 0 },
-    // Les identifiants des votants sont conserves pour garantir un seul vote
-    // par utilisateur.
+    // Les identifiants des votants sont conserves pour savoir qui a vote quoi.
+    //
+    // Un tableau ne garantit rien par lui-meme : l'unicite du vote vient de
+    // rateSauce, qui retire l'utilisateur des deux listes avant d'appliquer
+    // son choix, puis recalcule les compteurs depuis leur longueur. C'est donc
+    // une garantie applicative, pas une contrainte de la base : deux ecritures
+    // concurrentes sur le meme document pourraient la contourner. Un modele
+    // relationnel reglerait cela par une cle primaire composite.
     usersLiked: { type: [String], default: [] },
     usersDisliked: { type: [String], default: [] },
   },
