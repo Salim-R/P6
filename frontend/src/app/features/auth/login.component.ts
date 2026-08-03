@@ -3,13 +3,14 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
+import { FieldErrorComponent } from '../../shared/field-error.component';
 import { DEMO_ACCOUNT } from '../../core/api.config';
 import { AuthService } from '../../core/auth.service';
 
 @Component({
   selector: 'app-login',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, FieldErrorComponent],
   template: `
     <section class="wrapper">
       <div class="card panel">
@@ -34,6 +35,13 @@ import { AuthService } from '../../core/auth.service';
               autocomplete="email"
               placeholder="vous@exemple.fr"
               formControlName="email"
+              [attr.aria-invalid]="form.controls.email.invalid && form.controls.email.touched ? true : null"
+              [attr.aria-describedby]="form.controls.email.invalid && form.controls.email.touched ? 'erreur-email' : null"
+            />
+            <app-field-error
+              [control]="form.controls.email"
+              id="erreur-email"
+              message="Renseignez votre adresse e-mail."
             />
           </div>
 
@@ -45,6 +53,13 @@ import { AuthService } from '../../core/auth.service';
               type="password"
               autocomplete="current-password"
               formControlName="password"
+              [attr.aria-invalid]="form.controls.password.invalid && form.controls.password.touched ? true : null"
+              [attr.aria-describedby]="form.controls.password.invalid && form.controls.password.touched ? 'erreur-password' : null"
+            />
+            <app-field-error
+              [control]="form.controls.password"
+              id="erreur-password"
+              message="Renseignez votre mot de passe."
             />
           </div>
 

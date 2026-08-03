@@ -3,13 +3,14 @@ import { ChangeDetectionStrategy, Component, OnInit, inject, input, signal } fro
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
+import { FieldErrorComponent } from '../../shared/field-error.component';
 import { SaucePayload } from '../../core/sauce.model';
 import { SaucesService } from '../../core/sauces.service';
 
 @Component({
   selector: 'app-sauce-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, FieldErrorComponent],
   template: `
     <a class="back-link" routerLink="/sauces">← Retour au catalogue</a>
 
@@ -22,24 +23,36 @@ import { SaucesService } from '../../core/sauces.service';
         <div class="row">
           <div class="field">
             <label class="label" for="name">Nom</label>
-            <input id="name" class="input" type="text" formControlName="name" />
+            <input id="name" class="input" type="text" formControlName="name"
+              [attr.aria-invalid]="form.controls.name.invalid && form.controls.name.touched ? true : null"
+              [attr.aria-describedby]="form.controls.name.invalid && form.controls.name.touched ? 'erreur-name' : null" />
+            <app-field-error [control]="form.controls.name" id="erreur-name" message="Le nom est requis." />
           </div>
 
           <div class="field">
             <label class="label" for="manufacturer">Fabricant</label>
-            <input id="manufacturer" class="input" type="text" formControlName="manufacturer" />
+            <input id="manufacturer" class="input" type="text" formControlName="manufacturer"
+              [attr.aria-invalid]="form.controls.manufacturer.invalid && form.controls.manufacturer.touched ? true : null"
+              [attr.aria-describedby]="form.controls.manufacturer.invalid && form.controls.manufacturer.touched ? 'erreur-manufacturer' : null" />
+            <app-field-error [control]="form.controls.manufacturer" id="erreur-manufacturer" message="Le fabricant est requis." />
           </div>
         </div>
 
         <div class="field">
           <label class="label" for="description">Description</label>
-          <textarea id="description" class="input" rows="4" formControlName="description"></textarea>
+          <textarea id="description" class="input" rows="4" formControlName="description"
+              [attr.aria-invalid]="form.controls.description.invalid && form.controls.description.touched ? true : null"
+              [attr.aria-describedby]="form.controls.description.invalid && form.controls.description.touched ? 'erreur-description' : null"></textarea>
+            <app-field-error [control]="form.controls.description" id="erreur-description" message="La description est requise." />
         </div>
 
         <div class="row">
           <div class="field">
             <label class="label" for="mainPepper">Piment principal</label>
-            <input id="mainPepper" class="input" type="text" formControlName="mainPepper" />
+            <input id="mainPepper" class="input" type="text" formControlName="mainPepper"
+              [attr.aria-invalid]="form.controls.mainPepper.invalid && form.controls.mainPepper.touched ? true : null"
+              [attr.aria-describedby]="form.controls.mainPepper.invalid && form.controls.mainPepper.touched ? 'erreur-mainPepper' : null" />
+            <app-field-error [control]="form.controls.mainPepper" id="erreur-mainPepper" message="Le piment principal est requis." />
           </div>
 
           <div class="field">

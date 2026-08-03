@@ -4,12 +4,13 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angula
 import { Router, RouterLink } from '@angular/router';
 import { switchMap } from 'rxjs';
 
+import { FieldErrorComponent } from '../../shared/field-error.component';
 import { AuthService } from '../../core/auth.service';
 
 @Component({
   selector: 'app-signup',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, FieldErrorComponent],
   template: `
     <section class="wrapper">
       <div class="card panel">
@@ -26,10 +27,14 @@ import { AuthService } from '../../core/auth.service';
               autocomplete="email"
               placeholder="vous@exemple.fr"
               formControlName="email"
+              [attr.aria-invalid]="emailInvalid() ? true : null"
+              [attr.aria-describedby]="emailInvalid() ? 'erreur-email' : null"
             />
-            @if (emailInvalid()) {
-              <span class="hint">Adresse e-mail invalide.</span>
-            }
+            <app-field-error
+              [control]="form.controls.email"
+              id="erreur-email"
+              message="Adresse e-mail invalide."
+            />
           </div>
 
           <div class="field">
@@ -40,10 +45,21 @@ import { AuthService } from '../../core/auth.service';
               type="password"
               autocomplete="new-password"
               formControlName="password"
+              aria-describedby="regles-password"
+              [attr.aria-invalid]="
+                form.controls.password.invalid && form.controls.password.touched ? true : null
+              "
             />
-            <span class="hint">
+            <!-- L'indication reste affichée en permanence : annoncer les règles
+                 seulement après un échec oblige à deviner d'abord. -->
+            <span class="hint" id="regles-password">
               8 caractères minimum, avec une majuscule, une minuscule et 2 chiffres.
             </span>
+            <app-field-error
+              [control]="form.controls.password"
+              id="erreur-password"
+              message="Le mot de passe ne respecte pas ces règles."
+            />
           </div>
 
           @if (error()) {
